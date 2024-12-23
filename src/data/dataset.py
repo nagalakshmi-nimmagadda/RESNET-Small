@@ -1,15 +1,27 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from torchvision import transforms
 import os
 from PIL import Image
 
 class ImageNetDataset(Dataset):
-    def __init__(self, root_dir, split='train', transform=None):
+    def __init__(self, root_dir, split='train', transform=None, subset_size=None):
+        """
+        Args:
+            root_dir: Root directory of ImageNet dataset
+            split: 'train' or 'val'
+            transform: Optional transform to be applied
+            subset_size: If not None, use only this many classes
+        """
         self.root_dir = os.path.join(root_dir, split)
         self.split = split
         self.transform = transform or self._get_default_transforms()
+        
+        # Get all classes
         self.classes = sorted(os.listdir(self.root_dir))
+        if subset_size:
+            self.classes = self.classes[:subset_size]
+            
         self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
         self.samples = self._make_dataset()
 
